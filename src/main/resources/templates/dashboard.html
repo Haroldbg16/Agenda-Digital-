@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Agenda Digital</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Estilos personalizados -->
+    <style>
+        /* Animación para tarjetas */
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Animación para la barra de progreso */
+        .progress-bar {
+            transition: width 1.5s ease-in-out;
+        }
+
+        /* Animación al cargar elementos */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+    </style>
+</head>
+<body class="bg-light text-dark">
+
+<div class="container py-5">
+
+    <!-- Encabezado y menú -->
+    <div class="d-flex justify-content-between align-items-center mb-4 fade-in delay-1">
+        <h1 class="h3"><i class="bi bi-speedometer2 me-2"></i>Panel de Control - Agenda Digital</h1>
+        <div>
+            <a href="/tareas" class="btn btn-primary btn-sm me-2">
+                <i class="bi bi-list-task me-1"></i> Tareas
+            </a>
+            <a href="/tareas/lista" class="btn btn-outline-primary btn-sm me-2">
+                <i class="bi bi-card-checklist me-1"></i> Ver Lista
+            </a>
+            <a href="/tareas/nueva" class="btn btn-outline-success btn-sm me-2">
+                <i class="bi bi-plus-circle me-1"></i> Nueva
+            </a>
+            <a href="/tareas/progreso" class="btn btn-outline-info btn-sm">
+                <i class="bi bi-graph-up me-1"></i> Progreso
+            </a>
+        </div>
+    </div>
+
+    <!-- Tarjetas resumen -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4 fade-in delay-2">
+            <div class="card shadow rounded-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title"><i class="bi bi-check-circle-fill text-success me-1"></i>Completadas</h5>
+                    <p class="display-6 text-success fw-bold" th:text="${completadas}">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 fade-in delay-3">
+            <div class="card shadow rounded-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title"><i class="bi bi-hourglass-split text-warning me-1"></i>Pendientes</h5>
+                    <p class="display-6 text-warning fw-bold" th:text="${pendientes}">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 fade-in delay-4">
+            <div class="card shadow rounded-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title"><i class="bi bi-bar-chart-fill me-1"></i>Progreso</h5>
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-primary" role="progressbar"
+                             th:style="'width: ' + ${porcentaje} + '%'"
+                             th:text="${porcentaje + '%'}">0%
+                        </div>
+                    </div>
+                    <small class="text-muted" th:text="${porcentaje + '% completado'}">0%</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tareas próximas -->
+    <div class="mb-5 fade-in delay-2">
+        <h4 class="mb-3"><i class="bi bi-clock-history me-1"></i>Tareas Próximas (2 días)</h4>
+        <div class="list-group" th:if="${not #lists.isEmpty(tareasProximas)}">
+            <div class="list-group-item" th:each="tarea : ${tareasProximas}">
+                <div class="d-flex justify-content-between">
+                    <strong th:text="${tarea.titulo}">Título</strong>
+                    <small class="text-muted" th:text="${#temporals.format(tarea.fechaEntrega, 'dd/MM/yyyy')}">Fecha</small>
+                </div>
+                <div class="text-muted small" th:text="${tarea.curso}">Curso</div>
+            </div>
+        </div>
+        <p class="text-muted" th:unless="${not #lists.isEmpty(tareasProximas)}">No hay tareas próximas.</p>
+    </div>
+
+    <!-- Últimas tareas completadas -->
+    <div class="mb-5 fade-in delay-3">
+        <h4 class="mb-3"><i class="bi bi-check2-square me-1"></i>Últimas Tareas Completadas</h4>
+        <div class="list-group" th:if="${not #lists.isEmpty(tareasRecientes)}">
+            <div class="list-group-item" th:each="tarea : ${tareasRecientes}">
+                <div class="d-flex justify-content-between">
+                    <strong th:text="${tarea.titulo}">Título</strong>
+                    <small class="text-muted" th:text="${#temporals.format(tarea.fechaActualizacion, 'dd/MM/yyyy')}">Actualización</small>
+                </div>
+                <div class="text-muted small" th:text="${tarea.curso}">Curso</div>
+                <div class="text-muted small" th:text="${tarea.descripcion ?: 'Sin descripción'}">Descripción</div>
+            </div>
+        </div>
+        <p class="text-muted" th:unless="${not #lists.isEmpty(tareasRecientes)}">No hay tareas completadas recientemente.</p>
+    </div>
+
+    <!-- Tareas vencidas -->
+    <div class="mb-5 fade-in delay-4">
+        <h4 class="text-danger mb-3"><i class="bi bi-exclamation-octagon-fill me-1"></i>Tareas Vencidas</h4>
+        <div class="list-group" th:if="${not #lists.isEmpty(tareasVencidas)}">
+            <div class="list-group-item" th:each="tarea : ${tareasVencidas}">
+                <div class="d-flex justify-content-between">
+                    <strong class="text-danger" th:text="${tarea.titulo}">Título</strong>
+                    <small class="text-danger" th:text="${#temporals.format(tarea.fechaEntrega, 'dd/MM/yyyy')}">Vencida</small>
+                </div>
+                <div class="text-muted small" th:text="${tarea.curso}">Curso</div>
+                <div class="text-muted small" th:text="${tarea.descripcion ?: 'Sin descripción'}">Descripción</div>
+            </div>
+        </div>
+        <p class="text-muted" th:unless="${not #lists.isEmpty(tareasVencidas)}">No hay tareas vencidas.</p>
+    </div>
+
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Activar animación en scroll si deseas usar librerías externas como AOS
+    document.addEventListener("DOMContentLoaded", () => {
+        console.log("Dashboard animado cargado correctamente.");
+    });
+</script>
+
+</body>
+</html>

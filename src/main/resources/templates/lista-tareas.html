@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Tareas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="text-center mb-4">Lista de Tareas</h1>
+        
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Curso</th>
+                            <th>Fecha de Entrega</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="tarea : ${tareas}">
+                            <td th:text="${tarea.titulo}"></td>
+                            <td th:text="${tarea.curso}"></td>
+                            <td th:text="${#temporals.format(tarea.fechaEntrega, 'dd/MM/yyyy')}"></td>
+                            <td>
+                                <span th:if="${tarea.estado.name() == 'PENDIENTE'}" 
+                                      class="badge bg-warning">Pendiente</span>
+                                <span th:if="${tarea.estado.name() == 'COMPLETADA'}" 
+                                      class="badge bg-success">Completada</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/tareas/completar/{id}(id=${tarea.id})}" 
+                                   class="btn btn-sm btn-success" 
+                                   th:if="${tarea.estado.name() == 'PENDIENTE'}">Completar</a>
+                                <a th:href="@{/tareas/eliminar/{id}(id=${tarea.id})}" 
+                                   class="btn btn-sm btn-danger">Eliminar</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="d-grid gap-2 mt-3">
+                    <a href="/tareas/nueva" class="btn btn-primary">Nueva Tarea</a>
+                    <a href="/tareas" class="btn btn-secondary">Volver al Inicio</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

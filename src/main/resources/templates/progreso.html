@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Progreso - Agenda Digital</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.progress-container {
+	height: 30px;
+	margin-bottom: 15px;
+}
+
+.stat-card {
+	transition: transform 0.3s;
+}
+
+.stat-card:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+</style>
+</head>
+<body class="bg-light">
+	<div class="container py-5">
+		<div class="card shadow">
+			<div class="card-header bg-info text-white">
+				<div class="d-flex justify-content-between align-items-center">
+					<h2 class="mb-0">Mi Progreso</h2>
+					<span class="badge bg-light text-dark fs-6"
+						th:text="'Actualizado: ' + ${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}"></span>
+				</div>
+			</div>
+			<div class="card-body">
+				<!-- Resumen Rápido -->
+				<div class="row mb-4">
+					<div class="col-md-3 mb-3">
+						<div class="card stat-card h-100 bg-success text-white">
+							<div class="card-body text-center">
+								<h5 class="card-title">Completadas</h5>
+								<h2 th:text="${completadas}" class="display-4">0</h2>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-3 mb-3">
+						<div class="card stat-card h-100 bg-warning text-dark">
+							<div class="card-body text-center">
+								<h5 class="card-title">Pendientes</h5>
+								<h2 th:text="${pendientes}" class="display-4">0</h2>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-3 mb-3">
+						<div class="card stat-card h-100 bg-primary text-white">
+							<div class="card-body text-center">
+								<h5 class="card-title">Total</h5>
+								<h2 th:text="${total}" class="display-4">0</h2>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-3 mb-3">
+						<div class="card stat-card h-100 bg-secondary text-white">
+							<div class="card-body text-center">
+								<h5 class="card-title">Progreso</h5>
+								<h2 th:text="${porcentaje + '%'}" class="display-4">0%</h2>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Gráficos y Detalles -->
+				<div class="row">
+					<div class="col-lg-6 mb-4">
+						<div class="card h-100">
+							<div class="card-header bg-light">
+								<h5 class="mb-0">Distribución de Tareas</h5>
+							</div>
+							<div class="card-body">
+								<canvas id="progressChart"></canvas>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-6 mb-4">
+						<div class="card h-100">
+							<div class="card-header bg-light">
+								<h5 class="mb-0">Detalle de Progreso</h5>
+							</div>
+							<div class="card-body">
+								<div class="progress-container">
+									<div class="progress">
+										<div class="progress-bar bg-success" role="progressbar"
+											th:style="'width:' + ${porcentaje} + '%'"
+											th:attr="aria-valuenow=${porcentaje}" aria-valuemin="0"
+											aria-valuemax="100">
+											<span th:text="${porcentaje + '%'}">0%</span>
+										</div>
+									</div>
+								</div>
+								<div class="table-responsive">
+									<table class="table table-sm">
+										<tbody>
+											<tr>
+												<td><strong>Tareas Completadas:</strong></td>
+												<td th:text="${completadas}">0</td>
+												<td><span class="badge bg-success">+<span
+														th:text="${completadas}">0</span></span></td>
+											</tr>
+											<tr>
+												<td><strong>Tareas Pendientes:</strong></td>
+												<td th:text="${pendientes}">0</td>
+												<td><span class="badge bg-warning text-dark">-<span
+														th:text="${pendientes}">0</span></span></td>
+											</tr>
+											<tr class="table-primary">
+												<td><strong>Total Tareas:</strong></td>
+												<td th:text="${total}">0</td>
+												<td><span class="badge bg-primary"><span
+														th:text="${total}">0</span></span></td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+
+								<div class="alert"
+									th:classappend="${porcentaje > 70 ? ' alert-success' : (porcentaje > 30 ? ' alert-warning' : ' alert-danger')}">
+									<span th:if="${porcentaje > 70}">¡Excelente progreso!
+										Sigue así.</span> <span
+										th:if="${porcentaje > 30 and porcentaje <= 70}">Buen
+										trabajo, pero aún hay tareas pendientes.</span> <span
+										th:if="${porcentaje <= 30}">Necesitas enfocarte más en
+										tus tareas pendientes.</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Tareas Recientes -->
+				<div class="card mt-4">
+					<div class="card-header bg-light">
+						<h5 class="mb-0">Últimas Tareas Completadas</h5>
+					</div>
+					<div class="card-body">
+						<div th:if="${tareasRecientes.empty}" class="alert alert-info">
+							No hay tareas completadas recientemente.</div>
+						<div th:if="${not #lists.isEmpty(tareasRecientes)}"
+							class="list-group">
+							<a th:each="tarea : ${tareasRecientes}" href="#"
+								class="list-group-item list-group-item-action">
+								<div class="d-flex w-100 justify-content-between">
+									<h6 class="mb-1" th:text="${tarea.titulo ?: 'Sin título'}">Título</h6>
+									<small
+										th:text="${tarea.fechaActualizacion != null ? #temporals.format(tarea.fechaActualizacion, 'dd/MM/yyyy') : 'Sin fecha'}">Fecha</small>
+								</div>
+								<p class="mb-1" th:text="${tarea.curso ?: 'Curso no asignado'}">Curso</p>
+								<small class="text-muted"
+								th:text="${tarea.descripcion ?: 'Sin descripción'}">Descripción</small>
+							</a>
+						</div>
+					</div>
+				</div>
+
+				<div class="mt-4 text-center">
+					<a href="/tareas" class="btn btn-primary me-2"> <i
+						class="bi bi-house-door"></i> Volver al Inicio
+					</a> <a href="/tareas/lista" class="btn btn-outline-secondary"> <i
+						class="bi bi-list-check"></i> Ver Todas las Tareas
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- ChartJS -->
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function () {
+            const completadas = /*[[${completadas}]]*/ 0;
+            const pendientes = /*[[${pendientes}]]*/ 0;
+            const ctx = document.getElementById('progressChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completadas', 'Pendientes'],
+                    datasets: [{
+                        data: [completadas, pendientes],
+                        backgroundColor: ['#28a745', '#ffc107'],
+                        borderColor: ['#218838', '#e0a800'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const value = context.raw;
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${context.label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '70%',
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
+                    }
+                }
+            });
+        });
+        /*]]>*/
+	</script>
+</body>
+</html>
