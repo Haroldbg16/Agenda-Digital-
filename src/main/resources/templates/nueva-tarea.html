@@ -1,45 +1,163 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Nueva Tarea</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<meta charset="UTF-8">
+<title>Nueva Tarea</title>
+<link rel="icon" type="image/png" sizes="96x96" href="/img/icon.png">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+	rel="stylesheet">
+<style>
+body {
+	min-height: 100vh;
+	display: flex;
+}
+
+/* Sidebar estilo blackboard */
+        .sidebar {
+            width: 240px;
+            background: linear-gradient(180deg, #1e1e2d, #252540);
+            color: #e1e1e6;
+            padding: 20px 15px;
+            position: fixed;
+            height: 100%;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+        }
+
+        .sidebar h4 {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            color: #adb5bd;
+            text-decoration: none;
+            margin: 12px 0;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar a i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar a:hover {
+            background: #3a3a55;
+            color: #fff;
+        }
+
+.main-content {
+	margin-left: 240px;
+	padding: 40px;
+	width: 100%;
+}
+</style>
 </head>
-<body class="bg-light">
-    <div class="container py-5">
-        <h1 class="text-center mb-4">Nueva Tarea</h1>
-        
-        <div class="card">
-            <div class="card-body">
-                <form th:action="@{/tareas/guardar}" th:object="${tarea}" method="post">
-                    <div class="mb-3">
-                        <label for="titulo" class="form-label">Título</label>
-                        <input type="text" class="form-control" id="titulo" th:field="*{titulo}" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="curso" class="form-label">Curso/Materia</label>
-                        <input type="text" class="form-control" id="curso" th:field="*{curso}" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="fechaEntrega" class="form-label">Fecha de Entrega</label>
-                        <input type="date" class="form-control" id="fechaEntrega" 
-                               th:field="*{fechaEntrega}" th:min="${hoy}" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="descripcion" class="form-label">Descripción (Opcional)</label>
-                        <textarea class="form-control" id="descripcion" th:field="*{descripcion}" rows="3"></textarea>
-                    </div>
-                    
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Guardar Tarea</button>
-                        <a href="/tareas" class="btn btn-secondary">Cancelar</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+<body>
+
+	<!-- Sidebar izquierda -->
+	<div class="sidebar">
+		<h4 class="text-white mb-4">
+			<i class="bi bi-journal-plus"></i> Nueva Tarea
+		</h4>
+		<a href="/tareas"><i class="bi bi-arrow-left-circle me-2"></i>
+			Cancelar / Volver</a> <a href="/tareas/lista"><i
+			class="bi bi-list-task me-2"></i> Ver Tareas</a> <a
+			href="/tareas/calendario"><i class="bi bi-calendar-week me-2"></i>
+			Calendario</a> <a href="/cursos/lista"><i class="bi bi-book-half me-2"></i> Mis Cursos</a>
+	</div>
+
+	<!-- Contenido principal -->
+	<div class="main-content bg-light">
+		<div class="container">
+			<h2 class="text-primary text-center fw-bold mb-4">📝 Registrar
+				Nueva Tarea</h2>
+
+			<div class="card shadow-sm border-0 rounded-4 mx-auto"
+				style="max-width: 600px;">
+				<div class="card-body p-4">
+					<form th:action="@{/tareas/guardar}" th:object="${tarea}"
+						method="post">
+						<div class="mb-3">
+							<label for="titulo" class="form-label">Título</label> <input
+								type="text" class="form-control" id="titulo"
+								th:field="*{titulo}"
+								placeholder="Ej. Examen Final de Matemáticas" required>
+						</div>
+
+						<div class="mb-3">
+							<label class="form-label">Curso</label>
+							<div class="input-group">
+								<select class="form-select" id="cursoSelect"
+									onchange="document.getElementById('cursoInput').value=this.value">
+									<option value="">-- Seleccionar curso --</option>
+									<option th:each="c : ${cursos}" th:value="${c.nombre}"
+										th:text="${c.nombre}"></option>
+								</select> <input type="text" class="form-control" id="cursoInput"
+									name="curso" placeholder="O escribe el curso"
+									th:value="${tarea.curso}">
+							</div>
+							<div class="form-text">Puedes seleccionar un curso o
+								escribir uno nuevo.</div>
+						</div>
+
+						<div class="mb-3">
+							<label for="fechaEntrega" class="form-label">Fecha de
+								Entrega</label> <input type="date" class="form-control"
+								id="fechaEntrega" th:field="*{fechaEntrega}" th:min="${hoy}"
+								required>
+						</div>
+
+						<div class="mb-3">
+							<label for="descripcion" class="form-label">Descripción
+								(Opcional)</label>
+							<textarea class="form-control" id="descripcion"
+								th:field="*{descripcion}" rows="3"
+								placeholder="Instrucciones o detalles adicionales..."></textarea>
+						</div>
+
+						<div class="d-grid gap-2">
+							<button type="submit" class="btn btn-primary rounded-pill">
+								<i class="bi bi-save me-1"></i> Guardar Tarea
+							</button>
+							<a href="/tareas" class="btn btn-secondary rounded-pill"> <i
+								class="bi bi-x-circle me-1"></i> Cancelar
+							</a>
+						</div>
+					</form>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	
+	<!-- Watson Assistant Web Chat -->
+			<script>
+			  window.watsonAssistantChatOptions = {
+			    integrationID: "449f4a6c-c0c7-402f-b344-c06b007d6939", // The ID of this integration
+			    region: "us-south", // The region your integration is hosted in
+			    serviceInstanceID: "2c712c60-11fa-415d-93aa-c3d94491644c", // The ID of your service instance
+			    onLoad: async (instance) => { await instance.render(); }
+			  };
+			  setTimeout(function(){
+			    const t=document.createElement('script');
+			    t.src="https://web-chat.global.assistant.watson.appdomain.cloud/versions/" 
+			          + (window.watsonAssistantChatOptions.clientVersion || 'latest') 
+			          + "/WatsonAssistantChatEntry.js";
+			    document.head.appendChild(t);
+			  });
+			</script>
+	
+
 </body>
 </html>

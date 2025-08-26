@@ -1,186 +1,287 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Progreso - Agenda Digital</title>
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-.progress-container {
-	height: 30px;
-	margin-bottom: 15px;
-}
+    <meta charset="UTF-8">
+    <title>Progreso - Agenda Digital</title>
+	<link rel="icon" type="image/png" sizes="96x96" href="/img/icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-.stat-card {
-	transition: transform 0.3s;
-}
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            margin: 0;
+            background: #f0f2f8;
+        }
 
-.stat-card:hover {
-	transform: translateY(-5px);
-	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-</style>
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: linear-gradient(180deg, #1e1e2d, #252540);
+            color: #e1e1e6;
+            padding: 20px 15px;
+            position: fixed;
+            height: 100%;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+        }
+
+        .sidebar h4 {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            color: #adb5bd;
+            text-decoration: none;
+            margin: 12px 0;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar a i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar a:hover {
+            background: #3a3a55;
+            color: #fff;
+        }
+
+        /* Contenido */
+        .main-content {
+            margin-left: 240px;
+            padding: 40px;
+            width: calc(100% - 240px);
+            background: #f8f9fc;
+        }
+
+        /* Encabezado */
+        .header-progress {
+            background: linear-gradient(90deg, #17a2b8, #0dcaf0);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Tarjetas estadísticas */
+        .stat-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-radius: 15px;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Barra de progreso */
+        .progress-container {
+            height: 30px;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            background-image: linear-gradient(90deg, #28a745, #20c997);
+            background-size: 200% 100%;
+            animation: moveGradient 3s linear infinite;
+        }
+
+        @keyframes moveGradient {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Texto en gráfico */
+        #progressChart-container {
+            position: relative;
+        }
+
+        #progressCenterText {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: bold;
+            color: #212529;
+        }
+    </style>
 </head>
-<body class="bg-light">
-	<div class="container py-5">
-		<div class="card shadow">
-			<div class="card-header bg-info text-white">
-				<div class="d-flex justify-content-between align-items-center">
-					<h2 class="mb-0">Mi Progreso</h2>
-					<span class="badge bg-light text-dark fs-6"
-						th:text="'Actualizado: ' + ${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}"></span>
-				</div>
-			</div>
-			<div class="card-body">
-				<!-- Resumen Rápido -->
-				<div class="row mb-4">
-					<div class="col-md-3 mb-3">
-						<div class="card stat-card h-100 bg-success text-white">
-							<div class="card-body text-center">
-								<h5 class="card-title">Completadas</h5>
-								<h2 th:text="${completadas}" class="display-4">0</h2>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-3 mb-3">
-						<div class="card stat-card h-100 bg-warning text-dark">
-							<div class="card-body text-center">
-								<h5 class="card-title">Pendientes</h5>
-								<h2 th:text="${pendientes}" class="display-4">0</h2>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-3 mb-3">
-						<div class="card stat-card h-100 bg-primary text-white">
-							<div class="card-body text-center">
-								<h5 class="card-title">Total</h5>
-								<h2 th:text="${total}" class="display-4">0</h2>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-3 mb-3">
-						<div class="card stat-card h-100 bg-secondary text-white">
-							<div class="card-body text-center">
-								<h5 class="card-title">Progreso</h5>
-								<h2 th:text="${porcentaje + '%'}" class="display-4">0%</h2>
-							</div>
-						</div>
-					</div>
-				</div>
+<body>
 
-				<!-- Gráficos y Detalles -->
-				<div class="row">
-					<div class="col-lg-6 mb-4">
-						<div class="card h-100">
-							<div class="card-header bg-light">
-								<h5 class="mb-0">Distribución de Tareas</h5>
-							</div>
-							<div class="card-body">
-								<canvas id="progressChart"></canvas>
-							</div>
-						</div>
-					</div>
-					<div class="col-lg-6 mb-4">
-						<div class="card h-100">
-							<div class="card-header bg-light">
-								<h5 class="mb-0">Detalle de Progreso</h5>
-							</div>
-							<div class="card-body">
-								<div class="progress-container">
-									<div class="progress">
-										<div class="progress-bar bg-success" role="progressbar"
-											th:style="'width:' + ${porcentaje} + '%'"
-											th:attr="aria-valuenow=${porcentaje}" aria-valuemin="0"
-											aria-valuemax="100">
-											<span th:text="${porcentaje + '%'}">0%</span>
-										</div>
-									</div>
-								</div>
-								<div class="table-responsive">
-									<table class="table table-sm">
-										<tbody>
-											<tr>
-												<td><strong>Tareas Completadas:</strong></td>
-												<td th:text="${completadas}">0</td>
-												<td><span class="badge bg-success">+<span
-														th:text="${completadas}">0</span></span></td>
-											</tr>
-											<tr>
-												<td><strong>Tareas Pendientes:</strong></td>
-												<td th:text="${pendientes}">0</td>
-												<td><span class="badge bg-warning text-dark">-<span
-														th:text="${pendientes}">0</span></span></td>
-											</tr>
-											<tr class="table-primary">
-												<td><strong>Total Tareas:</strong></td>
-												<td th:text="${total}">0</td>
-												<td><span class="badge bg-primary"><span
-														th:text="${total}">0</span></span></td>
-											</tr>
-										</tbody>
-									</table>
-								</div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h4 class="text-white mb-4"><i class="bi bi-bar-chart-line"></i> Progreso</h4>
+        <a href="/tareas"><i class="bi bi-arrow-left-circle me-2"></i> Volver al Inicio</a>
+        <a href="/tareas/lista"><i class="bi bi-list-task me-2"></i> Ver Tareas</a>
+        <a href="/tareas/calendario"><i class="bi bi-calendar-check me-2"></i> Calendario</a>
+        <a href="/cursos/lista"><i class="bi bi-book-half me-2"></i> Mis Cursos</a>
+    </div>
 
-								<div class="alert"
-									th:classappend="${porcentaje > 70 ? ' alert-success' : (porcentaje > 30 ? ' alert-warning' : ' alert-danger')}">
-									<span th:if="${porcentaje > 70}">¡Excelente progreso!
-										Sigue así.</span> <span
-										th:if="${porcentaje > 30 and porcentaje <= 70}">Buen
-										trabajo, pero aún hay tareas pendientes.</span> <span
-										th:if="${porcentaje <= 30}">Necesitas enfocarte más en
-										tus tareas pendientes.</span>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+    <!-- Contenido -->
+    <div class="main-content">
 
-				<!-- Tareas Recientes -->
-				<div class="card mt-4">
-					<div class="card-header bg-light">
-						<h5 class="mb-0">Últimas Tareas Completadas</h5>
-					</div>
-					<div class="card-body">
-						<div th:if="${tareasRecientes.empty}" class="alert alert-info">
-							No hay tareas completadas recientemente.</div>
-						<div th:if="${not #lists.isEmpty(tareasRecientes)}"
-							class="list-group">
-							<a th:each="tarea : ${tareasRecientes}" href="#"
-								class="list-group-item list-group-item-action">
-								<div class="d-flex w-100 justify-content-between">
-									<h6 class="mb-1" th:text="${tarea.titulo ?: 'Sin título'}">Título</h6>
-									<small
-										th:text="${tarea.fechaActualizacion != null ? #temporals.format(tarea.fechaActualizacion, 'dd/MM/yyyy') : 'Sin fecha'}">Fecha</small>
-								</div>
-								<p class="mb-1" th:text="${tarea.curso ?: 'Curso no asignado'}">Curso</p>
-								<small class="text-muted"
-								th:text="${tarea.descripcion ?: 'Sin descripción'}">Descripción</small>
-							</a>
-						</div>
-					</div>
-				</div>
+        <!-- Encabezado -->
+        <div class="header-progress">
+            <h2 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i> Mi Progreso</h2>
+            <span class="badge bg-light text-dark fs-6"
+                  th:text="'Actualizado: ' + ${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}"></span>
+        </div>
 
-				<div class="mt-4 text-center">
-					<a href="/tareas" class="btn btn-primary me-2"> <i
-						class="bi bi-house-door"></i> Volver al Inicio
-					</a> <a href="/tareas/lista" class="btn btn-outline-secondary"> <i
-						class="bi bi-list-check"></i> Ver Todas las Tareas
-					</a>
-				</div>
-			</div>
-		</div>
-	</div>
+        <!-- Resumen rápido -->
+        <div class="row mb-4 text-center">
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card h-100 bg-success text-white">
+                    <div class="card-body">
+                        <i class="bi bi-check-circle display-6"></i>
+                        <h5 class="card-title mt-2">Completadas</h5>
+                        <h2 th:text="${completadas}" class="display-4">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card h-100 bg-warning text-dark">
+                    <div class="card-body">
+                        <i class="bi bi-hourglass-split display-6"></i>
+                        <h5 class="card-title mt-2">Pendientes</h5>
+                        <h2 th:text="${pendientes}" class="display-4">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card h-100 bg-primary text-white">
+                    <div class="card-body">
+                        <i class="bi bi-list-task display-6"></i>
+                        <h5 class="card-title mt-2">Total</h5>
+                        <h2 th:text="${total}" class="display-4">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card h-100 bg-secondary text-white">
+                    <div class="card-body">
+                        <i class="bi bi-bar-chart-line display-6"></i>
+                        <h5 class="card-title mt-2">Progreso</h5>
+                        <h2 th:text="${porcentaje + '%'}" class="display-4">0%</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-	<!-- ChartJS -->
-	<script th:inline="javascript">
-		/*<![CDATA[*/
+        <!-- Gráficos -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Distribución de Tareas</h5>
+                    </div>
+                    <div class="card-body" id="progressChart-container">
+                        <canvas id="progressChart"></canvas>
+                        <div id="progressCenterText">0%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Detalle de Progreso</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="progress-container">
+                            <div class="progress rounded-pill">
+                                <div class="progress-bar"
+                                     th:style="'width:' + ${porcentaje} + '%'"
+                                     th:attr="aria-valuenow=${porcentaje}"
+                                     aria-valuemin="0" aria-valuemax="100">
+                                    <span th:text="${porcentaje + '%'}">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive mt-3">
+                            <table class="table table-sm align-middle">
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Tareas Completadas:</strong></td>
+                                        <td th:text="${completadas}">0</td>
+                                        <td><span class="badge bg-success">+<span th:text="${completadas}"></span></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Tareas Pendientes:</strong></td>
+                                        <td th:text="${pendientes}">0</td>
+                                        <td><span class="badge bg-warning text-dark">-<span th:text="${pendientes}"></span></span></td>
+                                    </tr>
+                                    <tr class="table-primary">
+                                        <td><strong>Total Tareas:</strong></td>
+                                        <td th:text="${total}">0</td>
+                                        <td><span class="badge bg-primary"><span th:text="${total}"></span></span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="alert mt-3"
+                             th:classappend="${porcentaje > 70 ? ' alert-success' : (porcentaje > 30 ? ' alert-warning' : ' alert-danger')}">
+                            <i class="bi bi-emoji-smile me-2" th:if="${porcentaje > 70}"></i>
+                            <i class="bi bi-emoji-neutral me-2" th:if="${porcentaje > 30 and porcentaje <= 70}"></i>
+                            <i class="bi bi-emoji-frown me-2" th:if="${porcentaje <= 30}"></i>
+                            <span th:if="${porcentaje > 70}">¡Excelente progreso! Sigue así.</span>
+                            <span th:if="${porcentaje > 30 and porcentaje <= 70}">Buen trabajo, pero aún hay tareas pendientes.</span>
+                            <span th:if="${porcentaje <= 30}">Necesitas enfocarte más en tus tareas pendientes.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tareas recientes -->
+        <div class="card mt-4 border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Últimas Tareas Completadas</h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${tareasRecientes.empty}" class="alert alert-info">
+                    No hay tareas completadas recientemente.
+                </div>
+                <div th:if="${not #lists.isEmpty(tareasRecientes)}" class="list-group">
+                    <a th:each="tarea : ${tareasRecientes}" href="#"
+                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1 fw-bold" th:text="${tarea.titulo ?: 'Sin título'}">Título</h6>
+                            <p class="mb-1 text-muted" th:text="${tarea.curso ?: 'Curso no asignado'}">Curso</p>
+                            <small th:text="${tarea.descripcion ?: 'Sin descripción'}">Descripción</small>
+                        </div>
+                        <small class="text-nowrap text-secondary ms-2"
+                               th:text="${tarea.fechaActualizacion != null ? #temporals.format(tarea.fechaActualizacion, 'dd/MM/yyyy') : 'Sin fecha'}">Fecha</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Chart.js -->
+    <script th:inline="javascript">
         document.addEventListener('DOMContentLoaded', function () {
             const completadas = /*[[${completadas}]]*/ 0;
             const pendientes = /*[[${pendientes}]]*/ 0;
+            const porcentaje = /*[[${porcentaje}]]*/ 0;
             const ctx = document.getElementById('progressChart').getContext('2d');
+            const centerText = document.getElementById('progressCenterText');
+            centerText.textContent = porcentaje + '%';
 
             new Chart(ctx, {
                 type: 'doughnut',
@@ -189,20 +290,16 @@
                     datasets: [{
                         data: [completadas, pendientes],
                         backgroundColor: ['#28a745', '#ffc107'],
-                        borderColor: ['#218838', '#e0a800'],
                         borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
+                    cutout: '75%',
                     plugins: {
                         legend: {
                             position: 'bottom',
-                            labels: {
-                                font: {
-                                    size: 14
-                                }
-                            }
+                            labels: { font: { size: 14 } }
                         },
                         tooltip: {
                             callbacks: {
@@ -215,7 +312,6 @@
                             }
                         }
                     },
-                    cutout: '70%',
                     animation: {
                         animateScale: true,
                         animateRotate: true
@@ -223,7 +319,23 @@
                 }
             });
         });
-        /*]]>*/
-	</script>
+    </script>
+	
+	<!-- Watson Assistant Web Chat -->
+			<script>
+			  window.watsonAssistantChatOptions = {
+			    integrationID: "449f4a6c-c0c7-402f-b344-c06b007d6939", // The ID of this integration
+			    region: "us-south", // The region your integration is hosted in
+			    serviceInstanceID: "2c712c60-11fa-415d-93aa-c3d94491644c", // The ID of your service instance
+			    onLoad: async (instance) => { await instance.render(); }
+			  };
+			  setTimeout(function(){
+			    const t=document.createElement('script');
+			    t.src="https://web-chat.global.assistant.watson.appdomain.cloud/versions/" 
+			          + (window.watsonAssistantChatOptions.clientVersion || 'latest') 
+			          + "/WatsonAssistantChatEntry.js";
+			    document.head.appendChild(t);
+			  });
+			</script>
 </body>
 </html>

@@ -1,54 +1,206 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Lista de Tareas</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<meta charset="UTF-8">
+<title>Agenda Digital - Lista de Tareas</title>
+<link rel="icon" type="image/png" sizes="96x96" href="/img/icon.png">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+	rel="stylesheet">
+<style>
+body {
+	min-height: 100vh;
+	display: flex;
+}
+
+/* Sidebar estilo blackboard */
+        .sidebar {
+            width: 240px;
+            background: linear-gradient(180deg, #1e1e2d, #252540);
+            color: #e1e1e6;
+            padding: 20px 15px;
+            position: fixed;
+            height: 100%;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+        }
+
+        .sidebar h4 {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            color: #adb5bd;
+            text-decoration: none;
+            margin: 12px 0;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar a i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar a:hover {
+            background: #3a3a55;
+            color: #fff;
+        }
+.main-content {
+	margin-left: 240px;
+	padding: 40px;
+	width: 100%;
+}
+
+.badge {
+	font-size: 0.85em;
+	padding: 0.5em 0.75em;
+}
+
+.table th {
+	border-top: none;
+	font-weight: 600;
+}
+</style>
 </head>
-<body class="bg-light">
-    <div class="container py-5">
-        <h1 class="text-center mb-4">Lista de Tareas</h1>
-        
-        <div class="card">
-            <div class="card-body">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Título</th>
-                            <th>Curso</th>
-                            <th>Fecha de Entrega</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="tarea : ${tareas}">
-                            <td th:text="${tarea.titulo}"></td>
-                            <td th:text="${tarea.curso}"></td>
-                            <td th:text="${#temporals.format(tarea.fechaEntrega, 'dd/MM/yyyy')}"></td>
-                            <td>
-                                <span th:if="${tarea.estado.name() == 'PENDIENTE'}" 
-                                      class="badge bg-warning">Pendiente</span>
-                                <span th:if="${tarea.estado.name() == 'COMPLETADA'}" 
-                                      class="badge bg-success">Completada</span>
-                            </td>
-                            <td>
-                                <a th:href="@{/tareas/completar/{id}(id=${tarea.id})}" 
-                                   class="btn btn-sm btn-success" 
-                                   th:if="${tarea.estado.name() == 'PENDIENTE'}">Completar</a>
-                                <a th:href="@{/tareas/eliminar/{id}(id=${tarea.id})}" 
-                                   class="btn btn-sm btn-danger">Eliminar</a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                
-                <div class="d-grid gap-2 mt-3">
-                    <a href="/tareas/nueva" class="btn btn-primary">Nueva Tarea</a>
-                    <a href="/tareas" class="btn btn-secondary">Volver al Inicio</a>
-                </div>
-            </div>
-        </div>
-    </div>
+<body>
+
+	<!-- Sidebar -->
+	<div class="sidebar">
+		<h4 class="text-white mb-4">
+			<i class="bi bi-journal-check"></i> Agenda Digital
+		</h4>
+		<a href="/tareas/nueva"><i class="bi bi-plus-circle me-2"></i>
+			Nueva Tarea</a> <a href="/tareas"><i class="bi bi-house-door me-2"></i>
+			Volver al Inicio</a>
+	</div>
+
+	<!-- Main Content -->
+	<div class="main-content bg-light">
+		<div class="container">
+
+			<!-- 🔔 Mensajes flash -->
+			<div th:replace="fragments/mensajes :: mensajes"></div>
+
+			<h2 class="text-primary text-center fw-bold mb-4">📋 Lista de
+				Tareas</h2>
+
+
+			<!-- Formulario de búsqueda y filtro por curso -->
+			<div class="d-flex justify-content-end mb-2">
+				<form class="row g-2 align-items-center" method="get"
+					th:action="@{/tareas/lista}">
+
+					<!-- Input de búsqueda por título o curso con botón buscar -->
+					<div class="col-auto">
+						<div class="input-group input-group-sm">
+							<input type="text" class="form-control" name="busqueda"
+								th:value="${busqueda}" placeholder="Buscar título o curso">
+							<button class="btn btn-primary" type="submit">
+								<i class="bi bi-search"></i> Buscar
+							</button>
+						</div>
+					</div>
+
+					<!-- Select de filtrado por curso -->
+					<div class="col-auto">
+						<select class="form-select form-select-sm" name="curso">
+							<option value="">-- Filtrar por curso --</option>
+							<option th:each="c : ${cursos}" th:value="${c.nombre}"
+								th:selected="${cursoSeleccionado} == ${c.nombre}"
+								th:text="${c.nombre}"></option>
+						</select>
+					</div>
+
+					<!-- Botón Filtrar -->
+					<div class="col-auto">
+						<button class="btn btn-info btn-sm">
+							<i class="bi bi-funnel"></i> Filtrar
+						</button>
+					</div>
+
+					<!-- Botón Limpiar -->
+					<div class="col-auto">
+						<a class="btn btn-outline-secondary btn-sm"
+							th:href="@{/tareas/lista}">Limpiar</a>
+					</div>
+				</form>
+			</div>
+
+
+
+			<div class="card shadow-sm border-0 rounded-4">
+				<div class="card-body p-4">
+					<table class="table table-hover align-middle">
+						<thead class="table-light">
+							<tr>
+								<th>Título</th>
+								<th>Curso</th>
+								<th>Fecha de Entrega</th>
+								<th>Estado</th>
+								<th class="text-center">Acciones</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="tarea : ${tareas}">
+								<td th:text="${tarea.titulo}"></td>
+								<td th:text="${tarea.curso}"></td>
+								<td
+									th:text="${#temporals.format(tarea.fechaEntrega, 'dd/MM/yyyy')}"></td>
+								<td><span th:if="${tarea.estado.name() == 'PENDIENTE'}"
+									class="badge bg-warning text-dark"> <i
+										class="bi bi-hourglass-split"></i> Pendiente
+								</span> <span th:if="${tarea.estado.name() == 'COMPLETADA'}"
+									class="badge bg-success"> <i
+										class="bi bi-check-circle-fill"></i> Completada
+								</span></td>
+								<td class="text-center"><a
+									th:if="${tarea.estado.name() == 'PENDIENTE'}"
+									th:href="@{/tareas/completar/{id}(id=${tarea.id})}"
+									class="btn btn-sm btn-outline-success me-1"> <i
+										class="bi bi-check-circle"></i> Completar
+								</a> <a th:href="@{/tareas/eliminar/{id}(id=${tarea.id})}"
+									class="btn btn-sm btn-outline-danger"> <i
+										class="bi bi-trash"></i> Eliminar
+								</a></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	
+	<!-- Watson Assistant Web Chat -->
+		<script>
+		  window.watsonAssistantChatOptions = {
+		    integrationID: "449f4a6c-c0c7-402f-b344-c06b007d6939", // The ID of this integration
+		    region: "us-south", // The region your integration is hosted in
+		    serviceInstanceID: "2c712c60-11fa-415d-93aa-c3d94491644c", // The ID of your service instance
+		    onLoad: async (instance) => { await instance.render(); }
+		  };
+		  setTimeout(function(){
+		    const t=document.createElement('script');
+		    t.src="https://web-chat.global.assistant.watson.appdomain.cloud/versions/" 
+		          + (window.watsonAssistantChatOptions.clientVersion || 'latest') 
+		          + "/WatsonAssistantChatEntry.js";
+		    document.head.appendChild(t);
+		  });
+		</script>
+
+	<!-- ✅ Bootstrap JS necesario para alert-dismissible -->
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

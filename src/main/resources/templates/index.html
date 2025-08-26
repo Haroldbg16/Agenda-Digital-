@@ -1,46 +1,299 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agenda Digital</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda Digital</title>
+<link rel="icon" type="image/png" sizes="96x96" href="/img/icon.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+body {
+    min-height: 100vh;
+    display: flex;
+}
+
+/* Sidebar estilo Blackboard */
+.sidebar {
+    width: 240px;
+    background: linear-gradient(180deg, #1e1e2d, #252540);
+    color: #e1e1e6;
+    padding: 20px 15px;
+    position: fixed;
+    height: 100%;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease;
+    transform: translateX(-100%); /* Oculto en móvil */
+    z-index: 1050;
+}
+.sidebar.active {
+    transform: translateX(0);
+}
+.sidebar h4 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 10px;
+}
+.sidebar a {
+    display: flex;
+    align-items: center;
+    color: #adb5bd;
+    text-decoration: none;
+    margin: 12px 0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+.sidebar a i {
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+.sidebar a:hover {
+    background: #3a3a55;
+    color: #fff;
+}
+
+/* Overlay oscuro */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1040;
+}
+.overlay.active {
+    display: block;
+}
+
+/* Contenido principal */
+.main-content {
+    margin-left: 0;
+    padding: 40px;
+    width: 100%;
+    min-height: 100vh;
+    background: linear-gradient(135deg, rgba(245,245,250,0.95), rgba(230,230,240,0.95)),
+                url('/img/fondo1.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    backdrop-filter: blur(4px);
+}
+
+/* En pantallas grandes, sidebar fijo */
+@media (min-width: 992px) {
+    .sidebar {
+        transform: none;
+    }
+    .main-content {
+        margin-left: 250px;
+    }
+}
+
+.feature-card img {
+    max-height: 160px;
+    object-fit: contain;
+}
+</style>
 </head>
-<body class="bg-light">
-    <div class="container py-5">
-        <h1 class="text-center mb-4">Agenda Digital</h1>
-        
-        <!-- Recordatorios - Versión simplificada y funcional -->
-        <div class="alert alert-warning" th:if="${not #lists.isEmpty(tareasProximas)}">
-            <h4>Recordatorios</h4>
-            <ul>
-                <li th:each="tarea : ${tareasProximas}">
+<body>
+
+<!-- Botón hamburguesa (solo móvil) -->
+<button class="btn btn-dark d-lg-none m-2" id="toggleSidebar">
+  <i class="bi bi-list"></i>
+</button>
+
+<!-- Sidebar izquierda -->
+<div class="sidebar">
+    <h4 class="text-white mb-4">
+        <i class="bi bi-calendar2-week"></i> Agenda Digital
+    </h4>
+    <a href="/tareas/nueva"><i class="bi bi-plus-circle me-2"></i> Nueva Tarea</a> 
+    <a href="/tareas/lista"><i class="bi bi-list-task me-2"></i> Lista de Tareas</a> 
+    <a href="/cursos/lista"><i class="bi bi-journal-bookmark me-2"></i> Cursos</a>
+    <a href="/tareas/calendario"><i class="bi bi-calendar3 me-2"></i> Calendario</a> 
+    <a href="/tareas/hoy"><i class="bi bi-clock me-2"></i> Tareas de Hoy</a> 
+    <hr class="border-light"> 
+    <a href="/tareas/dashboard"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+    <a href="/tareas/progreso"><i class="bi bi-bar-chart-line me-2"></i> Progreso</a>
+</div>
+
+<!-- Overlay -->
+<div id="overlay" class="overlay"></div>
+
+<!-- Contenido principal -->
+<div class="main-content bg-light">
+    <div class="container">
+        <h1 class="text-center fw-bold text-primary mb-5">📘 Bienvenido a tu Agenda Digital</h1>
+
+        <div th:replace="fragments/mensajes :: mensajes"></div>
+
+        <!-- Recordatorios -->
+        <div class="alert alert-warning shadow-sm" th:if="${not #lists.isEmpty(tareasProximas)}">
+            <h5 class="fw-bold">
+                <i class="bi bi-bell-fill text-danger"></i> Recordatorios
+            </h5>
+            <ul class="mb-0">
+                <li th:each="tarea : ${tareasProximas}" th:attr="data-id=${tarea.id}">
                     <span th:with="
-                        hoy=${T(java.time.LocalDate).now()},
-                        manana=${hoy.plusDays(1)},
-                        fechaTexto=${tarea.fechaEntrega.isEqual(hoy) ? 'hoy' : 
-                                     (tarea.fechaEntrega.isEqual(manana) ? 'mañana' : 
-                                     'el ' + #temporals.format(tarea.fechaEntrega, 'dd/MM/yyyy'))}">
-                        Recuerda que <span th:text="${fechaTexto}"></span> debes entregar 
-                        <span th:text="${tarea.titulo}"></span> (<span th:text="${tarea.curso}"></span>)
-                    </span>
+        hoy=${T(java.time.LocalDate).now()},
+        manana=${hoy.plusDays(1)},
+        fechaEntrega=${tarea.fechaEntrega},
+        fechaTexto=${fechaEntrega.isEqual(hoy) ? 'hoy' :
+                     (fechaEntrega.isEqual(manana) ? 'mañana' :
+                     'el ' + #temporals.format(fechaEntrega, 'dd/MM/yyyy'))}">
+                        Recuerda que <strong th:text="${fechaTexto}"></strong> debes
+                        entregar <strong th:text="${tarea.titulo}"></strong> (<span th:text="${tarea.curso}"></span>)
+                    </span> 
+                    <button type="button" class="btn btn-sm btn-success ms-2 btn-completar">
+                        <i class="bi bi-check-circle"></i> Completar
+                    </button>
                 </li>
             </ul>
         </div>
-        
-        <!-- Menú principal -->
-        <div class="card">
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    <a href="/tareas/nueva" class="btn btn-primary">Registrar Nueva Tarea</a>
-                    <a href="/tareas/lista" class="btn btn-secondary">Ver Lista de Tareas</a>
-                    <a href="/tareas/calendario" class="btn btn-info">Ver Calendario</a>
-                    <a href="/tareas/hoy" class="btn btn-success">Ver Tareas de Hoy</a>
-                    <a href="/tareas/progreso" class="btn btn-warning">Ver Progreso</a>
-                    <a href="/tareas/dashboard" class="text-blue-500 hover:underline">Regresar al Dashborad</a>
+
+        <!-- Secciones con imágenes -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <!-- Nueva Tarea -->
+            <div class="col">
+                <div class="card shadow-sm feature-card h-100 text-center">
+                    <img th:src="@{/img/book.png}" class="card-img-top p-4" alt="Nueva tarea">
+                    <div class="card-body">
+                        <h5 class="card-title">Registrar Nueva Tarea</h5>
+                        <a href="/tareas/nueva" class="btn btn-primary rounded-pill mt-2">
+                            <i class="bi bi-plus-circle"></i> Ir
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Tareas -->
+            <div class="col">
+                <div class="card shadow-sm feature-card h-100 text-center">
+                    <img th:src="@{/img/list.png}" class="card-img-top p-4" alt="Lista de tareas">
+                    <div class="card-body">
+                        <h5 class="card-title">Ver Lista de Tareas</h5>
+                        <a href="/tareas/lista" class="btn btn-secondary rounded-pill mt-2">
+                            <i class="bi bi-list-task"></i> Ir
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendario -->
+            <div class="col">
+                <div class="card shadow-sm feature-card h-100 text-center">
+                    <img th:src="@{/img/calendario.png}" class="card-img-top p-4" alt="Calendario">
+                    <div class="card-body">
+                        <h5 class="card-title">Ver Calendario</h5>
+                        <a href="/tareas/calendario" class="btn btn-info rounded-pill mt-2 text-white">
+                            <i class="bi bi-calendar3"></i> Ir
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tareas de Hoy -->
+            <div class="col">
+                <div class="card shadow-sm feature-card h-100 text-center">
+                    <img th:src="@{/img/hoy.png}" class="card-img-top p-4" alt="Tareas de hoy">
+                    <div class="card-body">
+                        <h5 class="card-title">Ver Tareas de Hoy</h5>
+                        <a href="/tareas/hoy" class="btn btn-success rounded-pill mt-2">
+                            <i class="bi bi-clock"></i> Ir
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progreso -->
+            <div class="col">
+                <div class="card shadow-sm feature-card h-100 text-center">
+                    <img th:src="@{/img/progreso.png}" class="card-img-top p-4" alt="Progreso">
+                    <div class="card-body">
+                        <h5 class="card-title">Ver Progreso</h5>
+                        <a href="/tareas/progreso" class="btn btn-warning rounded-pill mt-2 text-dark">
+                            <i class="bi bi-bar-chart-line"></i> Ir
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard -->
+            <div class="col">
+                <div class="card shadow-sm feature-card h-100 text-center">
+                    <img th:src="@{/img/dashboard.png}" class="card-img-top p-4" alt="Dashboard">
+                    <div class="card-body">
+                        <h5 class="card-title">Dashboard General</h5>
+                        <a href="/tareas/dashboard" class="btn btn-dark rounded-pill mt-2">
+                            <i class="bi bi-speedometer2"></i> Ir
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<!-- Scripts -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Completar tareas por AJAX
+    document.querySelectorAll(".btn-completar").forEach(btn => {
+        btn.addEventListener("click", function() {
+            const li = this.closest("li");
+            const tareaId = li.getAttribute("data-id");
+
+            fetch(`/tareas/${tareaId}/completar-ajax`, { method: "POST" })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    li.remove();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(err => console.error(err));
+        });
+    });
+
+    // Sidebar responsive
+    const sidebar = document.querySelector(".sidebar");
+    const overlay = document.getElementById("overlay");
+    const toggleBtn = document.getElementById("toggleSidebar");
+
+    toggleBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("active");
+        overlay.classList.toggle("active");
+    });
+
+    overlay.addEventListener("click", () => {
+        sidebar.classList.remove("active");
+        overlay.classList.remove("active");
+    });
+});
+</script>
+
+<!-- Watson Assistant Web Chat -->
+<script>
+  window.watsonAssistantChatOptions = {
+    integrationID: "449f4a6c-c0c7-402f-b344-c06b007d6939",
+    region: "us-south",
+    serviceInstanceID: "2c712c60-11fa-415d-93aa-c3d94491644c",
+    onLoad: async (instance) => { await instance.render(); }
+  };
+  setTimeout(function(){
+    const t=document.createElement('script');
+    t.src="https://web-chat.global.assistant.watson.appdomain.cloud/versions/" 
+          + (window.watsonAssistantChatOptions.clientVersion || 'latest') 
+          + "/WatsonAssistantChatEntry.js";
+    document.head.appendChild(t);
+  });
+</script>
+
 </body>
 </html>
+

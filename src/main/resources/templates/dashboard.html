@@ -4,31 +4,101 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | Agenda Digital</title>
+	<link rel="icon" type="image/png" sizes="96x96" href="/img/icon.png">
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- Estilos personalizados -->
     <style>
-        /* Animación para tarjetas */
+        body {
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            background: #f4f6f9;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Sidebar estilo blackboard */
+        .sidebar {
+            width: 240px;
+            background: linear-gradient(180deg, #1e1e2d, #252540);
+            color: #e1e1e6;
+            padding: 20px 15px;
+            position: fixed;
+            height: 100%;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+        }
+
+        .sidebar h4 {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            color: #adb5bd;
+            text-decoration: none;
+            margin: 12px 0;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar a i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar a:hover {
+            background: #3a3a55;
+            color: #fff;
+        }
+
+        /* Contenido principal */
+        .main-content {
+            margin-left: 240px;
+            padding: 30px 25px;
+            width: 100%;
+        }
+
+        h1.h3 {
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Tarjetas */
         .card {
+            border: none;
+            border-radius: 15px;
+            background: #fff;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .card:hover {
-            transform: scale(1.03);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
 
-        /* Animación para la barra de progreso */
+        .card-title {
+            font-weight: 600;
+        }
+
+        .progress {
+            border-radius: 10px;
+            background: #e9ecef;
+        }
+
         .progress-bar {
+            border-radius: 10px;
             transition: width 1.5s ease-in-out;
         }
 
-        /* Animación al cargar elementos */
+        /* Animaciones suaves */
         .fade-in {
             opacity: 0;
             transform: translateY(20px);
@@ -47,58 +117,71 @@
         .delay-3 { animation-delay: 0.3s; }
         .delay-4 { animation-delay: 0.4s; }
         .delay-5 { animation-delay: 0.5s; }
+
+        /* Listas */
+        .list-group-item {
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            padding: 12px 16px;
+            background: #fafafa;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .list-group-item strong {
+            color: #333;
+        }
+
+        .text-muted.small {
+            font-size: 0.85rem;
+        }
     </style>
 </head>
-<body class="bg-light text-dark">
+<body>
 
-<div class="container py-5">
+<!-- Sidebar izquierda -->
+<div class="sidebar">
+    <h4><i class="bi bi-speedometer2"></i> Dashboard</h4>
+    <a href="/tareas"><i class="bi bi-arrow-left-circle"></i> Volver</a>
+    <a href="/tareas/lista"><i class="bi bi-card-checklist"></i> Lista de Tareas</a>
+    <a href="/tareas/nueva"><i class="bi bi-plus-circle"></i> Nueva Tarea</a>
+    <a href="/tareas/progreso"><i class="bi bi-graph-up"></i> Progreso</a>
+</div>
 
-    <!-- Encabezado y menú -->
+<!-- Contenido principal -->
+<div class="main-content">
+
+    <!-- Encabezado -->
     <div class="d-flex justify-content-between align-items-center mb-4 fade-in delay-1">
-        <h1 class="h3"><i class="bi bi-speedometer2 me-2"></i>Panel de Control - Agenda Digital</h1>
-        <div>
-            <a href="/tareas" class="btn btn-primary btn-sm me-2">
-                <i class="bi bi-list-task me-1"></i> Tareas
-            </a>
-            <a href="/tareas/lista" class="btn btn-outline-primary btn-sm me-2">
-                <i class="bi bi-card-checklist me-1"></i> Ver Lista
-            </a>
-            <a href="/tareas/nueva" class="btn btn-outline-success btn-sm me-2">
-                <i class="bi bi-plus-circle me-1"></i> Nueva
-            </a>
-            <a href="/tareas/progreso" class="btn btn-outline-info btn-sm">
-                <i class="bi bi-graph-up me-1"></i> Progreso
-            </a>
-        </div>
+        <h1 class="h3"><i class="bi bi-speedometer2 me-2 text-primary"></i>Panel de Control - Agenda Digital</h1>
     </div>
 
     <!-- Tarjetas resumen -->
     <div class="row g-4 mb-5">
         <div class="col-md-4 fade-in delay-2">
-            <div class="card shadow rounded-3">
+            <div class="card shadow-sm">
                 <div class="card-body text-center">
-                    <h5 class="card-title"><i class="bi bi-check-circle-fill text-success me-1"></i>Completadas</h5>
+                    <h5 class="card-title"><i class="bi bi-check-circle-fill text-success"></i> Completadas</h5>
                     <p class="display-6 text-success fw-bold" th:text="${completadas}">0</p>
                 </div>
             </div>
         </div>
         <div class="col-md-4 fade-in delay-3">
-            <div class="card shadow rounded-3">
+            <div class="card shadow-sm">
                 <div class="card-body text-center">
-                    <h5 class="card-title"><i class="bi bi-hourglass-split text-warning me-1"></i>Pendientes</h5>
+                    <h5 class="card-title"><i class="bi bi-hourglass-split text-warning"></i> Pendientes</h5>
                     <p class="display-6 text-warning fw-bold" th:text="${pendientes}">0</p>
                 </div>
             </div>
         </div>
         <div class="col-md-4 fade-in delay-4">
-            <div class="card shadow rounded-3">
+            <div class="card shadow-sm">
                 <div class="card-body text-center">
-                    <h5 class="card-title"><i class="bi bi-bar-chart-fill me-1"></i>Progreso</h5>
+                    <h5 class="card-title"><i class="bi bi-bar-chart-fill text-primary"></i> Progreso</h5>
                     <div class="progress mb-2">
                         <div class="progress-bar bg-primary" role="progressbar"
                              th:style="'width: ' + ${porcentaje} + '%'"
-                             th:text="${porcentaje + '%'}">0%
-                        </div>
+                             th:text="${porcentaje + '%'}">0%</div>
                     </div>
                     <small class="text-muted" th:text="${porcentaje + '% completado'}">0%</small>
                 </div>
@@ -106,9 +189,24 @@
         </div>
     </div>
 
-    <!-- Tareas próximas -->
+    <!-- Tareas Hoy -->
     <div class="mb-5 fade-in delay-2">
-        <h4 class="mb-3"><i class="bi bi-clock-history me-1"></i>Tareas Próximas (2 días)</h4>
+        <h4><i class="bi bi-calendar-day text-primary"></i> Tareas para Hoy</h4>
+        <div class="list-group" th:if="${not #lists.isEmpty(tareasHoy)}">
+            <div class="list-group-item" th:each="tarea : ${tareasHoy}">
+                <div class="d-flex justify-content-between">
+                    <strong th:text="${tarea.titulo}">Título</strong>
+                    <small class="text-muted" th:text="${#temporals.format(tarea.fechaEntrega, 'dd/MM/yyyy')}">Fecha</small>
+                </div>
+                <div class="text-muted small" th:text="${tarea.curso}">Curso</div>
+            </div>
+        </div>
+        <p class="text-muted fst-italic" th:unless="${not #lists.isEmpty(tareasHoy)}">No hay tareas para hoy.</p>
+    </div>
+
+    <!-- Próximos 2 días -->
+    <div class="mb-5 fade-in delay-3">
+        <h4><i class="bi bi-clock-history text-info"></i> Próximos 2 días</h4>
         <div class="list-group" th:if="${not #lists.isEmpty(tareasProximas)}">
             <div class="list-group-item" th:each="tarea : ${tareasProximas}">
                 <div class="d-flex justify-content-between">
@@ -118,12 +216,27 @@
                 <div class="text-muted small" th:text="${tarea.curso}">Curso</div>
             </div>
         </div>
-        <p class="text-muted" th:unless="${not #lists.isEmpty(tareasProximas)}">No hay tareas próximas.</p>
+        <p class="text-muted fst-italic" th:unless="${not #lists.isEmpty(tareasProximas)}">No hay tareas próximas.</p>
     </div>
 
-    <!-- Últimas tareas completadas -->
-    <div class="mb-5 fade-in delay-3">
-        <h4 class="mb-3"><i class="bi bi-check2-square me-1"></i>Últimas Tareas Completadas</h4>
+    <!-- Futuras -->
+    <div class="mb-5 fade-in delay-4">
+        <h4 class="text-primary"><i class="bi bi-calendar4-week"></i> Tareas Futuras</h4>
+        <div class="list-group" th:if="${not #lists.isEmpty(tareasFuturas)}">
+            <div class="list-group-item" th:each="tarea : ${tareasFuturas}">
+                <div class="d-flex justify-content-between">
+                    <strong th:text="${tarea.titulo}">Título</strong>
+                    <small class="text-muted" th:text="${#temporals.format(tarea.fechaEntrega, 'dd/MM/yyyy')}">Fecha</small>
+                </div>
+                <div class="text-muted small" th:text="${tarea.curso}">Curso</div>
+            </div>
+        </div>
+        <p class="text-muted fst-italic" th:unless="${not #lists.isEmpty(tareasFuturas)}">No hay tareas futuras.</p>
+    </div>
+
+    <!-- Completadas -->
+    <div class="mb-5 fade-in delay-5">
+        <h4><i class="bi bi-check2-square text-success"></i> Últimas Completadas</h4>
         <div class="list-group" th:if="${not #lists.isEmpty(tareasRecientes)}">
             <div class="list-group-item" th:each="tarea : ${tareasRecientes}">
                 <div class="d-flex justify-content-between">
@@ -134,36 +247,52 @@
                 <div class="text-muted small" th:text="${tarea.descripcion ?: 'Sin descripción'}">Descripción</div>
             </div>
         </div>
-        <p class="text-muted" th:unless="${not #lists.isEmpty(tareasRecientes)}">No hay tareas completadas recientemente.</p>
+        <p class="text-muted fst-italic" th:unless="${not #lists.isEmpty(tareasRecientes)}">No hay tareas completadas recientemente.</p>
     </div>
 
-    <!-- Tareas vencidas -->
-    <div class="mb-5 fade-in delay-4">
-        <h4 class="text-danger mb-3"><i class="bi bi-exclamation-octagon-fill me-1"></i>Tareas Vencidas</h4>
+    <!-- Vencidas -->
+    <div class="mb-5 fade-in delay-5">
+        <h4 class="text-danger"><i class="bi bi-exclamation-octagon-fill"></i> Tareas Vencidas</h4>
         <div class="list-group" th:if="${not #lists.isEmpty(tareasVencidas)}">
-            <div class="list-group-item" th:each="tarea : ${tareasVencidas}">
+            <div class="list-group-item border-danger-subtle" th:each="tarea : ${tareasVencidas}">
                 <div class="d-flex justify-content-between">
                     <strong class="text-danger" th:text="${tarea.titulo}">Título</strong>
-                    <small class="text-danger" th:text="${#temporals.format(tarea.fechaEntrega, 'dd/MM/yyyy')}">Vencida</small>
+                    <small class="text-danger fw-bold" th:text="${#temporals.format(tarea.fechaEntrega, 'dd/MM/yyyy')}">Vencida</small>
                 </div>
                 <div class="text-muted small" th:text="${tarea.curso}">Curso</div>
                 <div class="text-muted small" th:text="${tarea.descripcion ?: 'Sin descripción'}">Descripción</div>
             </div>
         </div>
-        <p class="text-muted" th:unless="${not #lists.isEmpty(tareasVencidas)}">No hay tareas vencidas.</p>
+        <p class="text-muted fst-italic" th:unless="${not #lists.isEmpty(tareasVencidas)}">No hay tareas vencidas.</p>
     </div>
 
 </div>
 
+<!-- Watson Assistant Web Chat -->
+		<script>
+		  window.watsonAssistantChatOptions = {
+		    integrationID: "449f4a6c-c0c7-402f-b344-c06b007d6939", // The ID of this integration
+		    region: "us-south", // The region your integration is hosted in
+		    serviceInstanceID: "2c712c60-11fa-415d-93aa-c3d94491644c", // The ID of your service instance
+		    onLoad: async (instance) => { await instance.render(); }
+		  };
+		  setTimeout(function(){
+		    const t=document.createElement('script');
+		    t.src="https://web-chat.global.assistant.watson.appdomain.cloud/versions/" 
+		          + (window.watsonAssistantChatOptions.clientVersion || 'latest') 
+		          + "/WatsonAssistantChatEntry.js";
+		    document.head.appendChild(t);
+		  });
+		</script>
+
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
-    // Activar animación en scroll si deseas usar librerías externas como AOS
     document.addEventListener("DOMContentLoaded", () => {
-        console.log("Dashboard animado cargado correctamente.");
+        console.log("Dashboard mejorado estilo Blackboard cargado.");
     });
 </script>
-
 </body>
 </html>
+
+

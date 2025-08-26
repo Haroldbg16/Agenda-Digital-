@@ -12,12 +12,14 @@ target/
 .settings
 .springBeans
 .sts4-cache
+.metadata/
 
 ### IntelliJ IDEA ###
 .idea
 *.iws
 *.iml
 *.ipr
+out/
 
 ### NetBeans ###
 /nbproject/private/
@@ -31,3 +33,29 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Archivos de logs ###
+*.log
+
+### Bases de datos locales ###
+/db/
+*.h2.db
+*.mv.db
+
+### Archivos temporales ###
+*.tmp
+*.bak
+*.swp
+
+### Archivos compilados de Java ###
+*.class
+
+### Archivos de empaquetado ###
+*.jar
+*.war
+*.ear
+
+### Archivos sensibles ###
+application-*.properties
+application-*.yml
+

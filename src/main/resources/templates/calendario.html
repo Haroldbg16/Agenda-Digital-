@@ -4,63 +4,179 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendario - Agenda Digital</title>
+	<link rel="icon" type="image/png" sizes="96x96" href="/img/icon.png">
+
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- FullCalendar -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            background: #f8f9fc;
+        }
+
+        /* Sidebar igual al estilo Progreso */
+        .sidebar {
+            width: 240px;
+            background: linear-gradient(180deg, #1e1e2d, #252540);
+            color: #e1e1e6;
+            padding: 20px 15px;
+            position: fixed;
+            height: 100%;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+        }
+
+        .sidebar h4 {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            color: #adb5bd;
+            text-decoration: none;
+            margin: 12px 0;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar a i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar a:hover {
+            background: #3a3a55;
+            color: #fff;
+        }
+
+        /* Contenido principal ocupa todo el ancho restante */
+        .main-content {
+            margin-left: 240px;
+            padding: 40px;
+            width: 100%;
+        }
+
+        /* Card calendario como bloque grande */
+        .calendar-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        #calendar {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+        }
+
+        .fc-toolbar-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #212529;
+        }
+
+        .fc-event {
+            border-radius: 8px;
+            padding: 3px 5px;
+        }
+
+        .fc-event:hover {
+            cursor: pointer;
+            opacity: 0.85;
+            transform: scale(1.03);
+            transition: 0.2s;
+        }
+    </style>
 </head>
-<body class="bg-light">
-    <div class="container py-5">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h2 class="mb-0">Calendario de Tareas</h2>
-            </div>
-            <div class="card-body">
-                <div id="calendar"></div>
-                
-                <div class="mt-3">
-                    <a href="/tareas" class="btn btn-secondary">Volver al Inicio</a>
-                </div>
-            </div>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h4 class="text-white mb-4"><i class="bi bi-calendar2-week"></i> Calendario</h4>
+        <a href="/tareas"><i class="bi bi-arrow-left-circle me-2"></i> Volver al Inicio</a>
+        <a href="/tareas/lista"><i class="bi bi-list-task me-2"></i> Ver Tareas</a>
+        <a href="/tareas/progreso"><i class="bi bi-graph-up-arrow me-2"></i> Mi Progreso</a>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <div class="calendar-card">
+            <h2 class="mb-4"><i class="bi bi-calendar-event me-2 text-primary"></i> Calendario de Tareas</h2>
+            <div id="calendar"></div>
         </div>
     </div>
 
-    <!-- Scripts para FullCalendar -->
+    <!-- FullCalendar Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/es.min.js"></script>
-    
+
     <script th:inline="javascript">
         document.addEventListener('DOMContentLoaded', function() {
             const calendarEl = document.getElementById('calendar');
             const tareas = /*[[${tareas}]]*/ [];
-            
+
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'es',
+                height: 650,
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
                 events: tareas.map(tarea => ({
-                    title: tarea.titulo + ' - ' + tarea.curso,
+                    title: tarea.titulo,
                     start: tarea.fechaEntrega,
                     allDay: true,
                     backgroundColor: tarea.estado === 'COMPLETADA' ? '#28a745' : '#ffc107',
                     borderColor: tarea.estado === 'COMPLETADA' ? '#218838' : '#e0a800',
                     extendedProps: {
-                        descripcion: tarea.descripcion
+                        descripcion: tarea.descripcion,
+                        curso: tarea.curso
                     }
                 })),
                 eventClick: function(info) {
                     alert(
                         'Tarea: ' + info.event.title + '\n' +
+                        'Curso: ' + (info.event.extendedProps.curso || 'No disponible') + '\n' +
                         'Fecha: ' + info.event.start.toLocaleDateString() + '\n' +
                         'Descripción: ' + (info.event.extendedProps.descripcion || 'No disponible')
                     );
                 }
             });
-            
+
             calendar.render();
         });
     </script>
+	
+	<!-- Watson Assistant Web Chat -->
+	<script>
+	  window.watsonAssistantChatOptions = {
+	    integrationID: "449f4a6c-c0c7-402f-b344-c06b007d6939", // The ID of this integration
+	    region: "us-south", // The region your integration is hosted in
+	    serviceInstanceID: "2c712c60-11fa-415d-93aa-c3d94491644c", // The ID of your service instance
+	    onLoad: async (instance) => { await instance.render(); }
+	  };
+	  setTimeout(function(){
+	    const t=document.createElement('script');
+	    t.src="https://web-chat.global.assistant.watson.appdomain.cloud/versions/" 
+	          + (window.watsonAssistantChatOptions.clientVersion || 'latest') 
+	          + "/WatsonAssistantChatEntry.js";
+	    document.head.appendChild(t);
+	  });
+	</script>
 </body>
 </html>
+

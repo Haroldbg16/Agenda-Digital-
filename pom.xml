@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.3</version>
+		<version>3.5.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.agendadigital</groupId>
@@ -64,11 +64,11 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>pe.cibertec</groupId>
-			<artifactId>proy-sistema-almacen</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+		 <dependency>
+   		    <groupId>com.ibm.watson</groupId>
+    		<artifactId>ibm-watson</artifactId>
+            <version>10.1.0</version>
+      </dependency>
 	</dependencies>
 
 	<build>

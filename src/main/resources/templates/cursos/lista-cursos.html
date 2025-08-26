@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Lista de Cursos - Agenda Digital</title>
+<link rel="icon" type="image/png" sizes="96x96" href="/img/icon.png">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+	rel="stylesheet">
+<style>
+body {
+	min-height: 100vh;
+	background-color: #f8f9fa;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Sidebar estilo blackboard */
+        .sidebar {
+            width: 240px;
+            background: linear-gradient(180deg, #1e1e2d, #252540);
+            color: #e1e1e6;
+            padding: 20px 15px;
+            position: fixed;
+            height: 100%;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+        }
+
+        .sidebar h4 {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            color: #adb5bd;
+            text-decoration: none;
+            margin: 12px 0;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar a i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar a:hover {
+            background: #3a3a55;
+            color: #fff;
+        }
+
+.main-content {
+	margin-left: 240px;
+	padding: 40px;
+	min-height: 100vh;
+}
+
+.badge {
+	font-size: 0.85em;
+	padding: 0.5em 0.75em;
+}
+
+.table th {
+	border-top: none;
+	font-weight: 600;
+	background-color: #f8f9fa;
+}
+
+.alert i {
+	margin-right: 10px;
+	font-size: 1.2em;
+}
+
+.card {
+	border: none;
+	border-radius: 12px;
+	box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.btn-action {
+	padding: 0.25rem 0.5rem;
+	font-size: 0.875rem;
+}
+</style>
+</head>
+<body>
+
+
+	<!-- Sidebar -->
+	<div class="sidebar">
+		<h4 class="text-white mb-4">
+			<i class="bi bi-journal-check"></i> Agenda Digital
+		</h4>
+		<a href="/tareas/nueva"><i class="bi bi-plus-circle me-2"></i>
+			Nueva Tarea</a> <a href="/cursos/nuevo"><i
+			class="bi bi-plus-circle me-2"></i> Nuevo Curso</a> <a href="/tareas"><i
+			class="bi bi-house-door me-2"></i> Volver al Inicio</a>
+	</div>
+
+	<!-- Main Content -->
+	<div class="main-content">
+		<div class="container-fluid">
+
+			<!-- 🔔 Mensajes simplificados - Sin verificación de sesión -->
+			<!-- Alerts simples -->
+			<div class="container mt-3" style="max-width: 1000px;">
+				<div th:if="${success}"
+					class="alert alert-success alert-dismissible fade show"
+					role="alert">
+					<i class="bi bi-check-circle-fill"></i> <span th:text="${success}"></span>
+					<button type="button" class="btn-close" data-bs-dismiss="alert"
+						aria-label="Close"></button>
+				</div>
+				<div th:if="${info}"
+					class="alert alert-info alert-dismissible fade show" role="alert">
+					<i class="bi bi-info-circle-fill"></i> <span th:text="${info}"></span>
+					<button type="button" class="btn-close" data-bs-dismiss="alert"
+						aria-label="Close"></button>
+				</div>
+				<div th:if="${warning}"
+					class="alert alert-warning alert-dismissible fade show"
+					role="alert">
+					<i class="bi bi-exclamation-triangle-fill"></i> <span
+						th:text="${warning}"></span>
+					<button type="button" class="btn-close" data-bs-dismiss="alert"
+						aria-label="Close"></button>
+				</div>
+				<div th:if="${error}"
+					class="alert alert-danger alert-dismissible fade show" role="alert">
+					<i class="bi bi-x-circle-fill"></i> <span th:text="${error}"></span>
+					<button type="button" class="btn-close" data-bs-dismiss="alert"
+						aria-label="Close"></button>
+				</div>
+			</div>
+
+			<div class="d-flex justify-content-between align-items-center mb-4">
+				<h2 class="text-primary fw-bold">📚 Lista de Cursos</h2>
+				<a th:href="@{/cursos/nuevo}" class="btn btn-primary"> <i
+					class="bi bi-plus-circle"></i> Agregar Curso
+				</a>
+			</div>
+
+			<div class="card">
+				<div class="card-body">
+					<div class="table-responsive">
+						<table class="table table-hover align-middle">
+							<thead class="table-light">
+								<tr>
+								    <th>Id Curso</th>
+									<th>Nombre del Curso</th>
+									<th>Profesor</th>
+									<th>Horario</th>
+									<th>Descripción</th>
+									<th class="text-center">Acciones</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="curso : ${cursos}">
+									<td th:text="${curso.id}"></td>
+									<td th:text="${curso.nombre}"></td>
+									<td th:text="${curso.profesor}"></td>
+									<td th:text="${curso.horario}"></td>
+									<td th:text="${curso.descripcion}"></td>
+									<td class="text-center"><a
+										th:href="@{/cursos/editar/{id}(id=${curso.id})}"
+										class="btn btn-sm btn-outline-primary btn-action me-1"> <i
+											class="bi bi-pencil"></i> Editar
+									</a> <a th:href="@{/cursos/eliminar/{id}(id=${curso.id})}"
+										class="btn btn-sm btn-outline-danger btn-action"
+										onclick="return confirm('¿Estás seguro de que quieres eliminar este curso?')">
+											<i class="bi bi-trash"></i> Eliminar
+									</a></td>
+								</tr>
+								<tr th:if="${#lists.isEmpty(cursos)}">
+									<td colspan="6" class="text-center text-muted py-4"><i
+										class="bi bi-inbox display-4 d-block mb-2"></i> No hay cursos
+										registrados. <a th:href="@{/cursos/nuevo}">Agrega el
+											primer curso</a></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	
+	<!-- Watson Assistant Web Chat -->
+		<script>
+		  window.watsonAssistantChatOptions = {
+		    integrationID: "449f4a6c-c0c7-402f-b344-c06b007d6939", // The ID of this integration
+		    region: "us-south", // The region your integration is hosted in
+		    serviceInstanceID: "2c712c60-11fa-415d-93aa-c3d94491644c", // The ID of your service instance
+		    onLoad: async (instance) => { await instance.render(); }
+		  };
+		  setTimeout(function(){
+		    const t=document.createElement('script');
+		    t.src="https://web-chat.global.assistant.watson.appdomain.cloud/versions/" 
+		          + (window.watsonAssistantChatOptions.clientVersion || 'latest') 
+		          + "/WatsonAssistantChatEntry.js";
+		    document.head.appendChild(t);
+		  });
+		</script>
+
+	<!-- Bootstrap JS -->
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
+        // Cerrar automáticamente las alertas después de 5 segundos
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

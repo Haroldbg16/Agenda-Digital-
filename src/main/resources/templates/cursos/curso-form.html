@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Agregar/Editar Curso</title>
+  <link rel="icon" type="image/png" sizes="96x96" href="/img/icon.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+	
+    .card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    .card-header {
+      border-radius: 12px 12px 0 0 !important;
+    }
+    .form-control:focus {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    .btn {
+      border-radius: 8px;
+      padding: 0.5rem 1.5rem;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  
+  <!-- Fragmento de mensajes -->
+  <div th:replace="fragments/mensajes :: mensajes"></div>
+  
+
+  <div class="container py-4" style="max-width: 800px;">
+    <div class="card shadow rounded-3">
+      <div class="card-header bg-primary text-white">
+        <h3 class="mb-0" th:text="${curso.id != null ? 'Editar Curso' : 'Agregar Curso'}">Agregar Curso</h3>
+      </div>
+      <div class="card-body">
+        <form th:action="@{/cursos/guardar}" th:object="${curso}" method="post">
+          <input type="hidden" th:field="*{id}"/>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Nombre</label>
+              <input class="form-control" th:field="*{nombre}" required placeholder="Ej: Lenguaje de Programación 1">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Profesor</label>
+              <input class="form-control" th:field="*{profesor}" placeholder="Ej: Juan Pérez">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Horario</label>
+              <input class="form-control" th:field="*{horario}" placeholder="Ej: Lunes 9:00 - 11:00">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Descripción</label>
+              <textarea class="form-control" th:field="*{descripcion}" rows="3"
+                        placeholder="Notas o detalles del curso"></textarea>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between mt-4">
+            <a href="/cursos/lista" class="btn btn-secondary">
+              <i class="bi bi-arrow-left-circle"></i> Volver
+            </a>
+            <button class="btn btn-success" type="submit">
+              <i class="bi bi-save"></i> Guardar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Watson Assistant Web Chat -->
+  		<script>
+  		  window.watsonAssistantChatOptions = {
+  		    integrationID: "449f4a6c-c0c7-402f-b344-c06b007d6939", // The ID of this integration
+  		    region: "us-south", // The region your integration is hosted in
+  		    serviceInstanceID: "2c712c60-11fa-415d-93aa-c3d94491644c", // The ID of your service instance
+  		    onLoad: async (instance) => { await instance.render(); }
+  		  };
+  		  setTimeout(function(){
+  		    const t=document.createElement('script');
+  		    t.src="https://web-chat.global.assistant.watson.appdomain.cloud/versions/" 
+  		          + (window.watsonAssistantChatOptions.clientVersion || 'latest') 
+  		          + "/WatsonAssistantChatEntry.js";
+  		    document.head.appendChild(t);
+  		  });
+  		</script>
+</body>
+</html>

@@ -29,9 +29,14 @@ public class TareaService {
     }
 
     public List<Tarea> obtenerTareasProximas() {
-        LocalDate hoy = LocalDate.now();
-        LocalDate enDosDias = hoy.plusDays(2);
-        return tareaRepository.findByFechaEntregaBetween(hoy, enDosDias);
+        LocalDate manana = LocalDate.now().plusDays(1);
+        LocalDate pasadoManana = LocalDate.now().plusDays(2);
+        return tareaRepository.findByFechaEntregaBetween(manana, pasadoManana);
+    }
+
+    public List<Tarea> obtenerTareasFuturas() {
+        LocalDate despuesDePasadoManana = LocalDate.now().plusDays(2);
+        return tareaRepository.findByFechaEntregaAfter(despuesDePasadoManana);
     }
 
     public List<Tarea> obtenerTareasVencidas() {
@@ -74,8 +79,12 @@ public class TareaService {
     public List<Tarea> buscarTareas(String query) {
         return tareaRepository.buscarPorTituloOCurso(query);
     }
+    
+    public List<Tarea> buscarTareasPorCurso(String cursoNombre) {
+        return tareaRepository.findByCursoContainingIgnoreCase(cursoNombre);
+    }
 
-    // Para progreso.html
+
     public long contarTareasCompletadas() {
         return tareaRepository.countByEstado(EstadoTarea.COMPLETADA);
     }
@@ -88,7 +97,6 @@ public class TareaService {
         return tareaRepository.findTop5ByEstadoOrderByFechaActualizacionDesc(EstadoTarea.COMPLETADA);
     }
 
-    // Métodos para el dashboard
     public List<Tarea> obtenerTareasCompletadas() {
         return tareaRepository.findByEstado(EstadoTarea.COMPLETADA);
     }
